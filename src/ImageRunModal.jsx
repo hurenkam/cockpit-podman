@@ -210,6 +210,58 @@ const Volume = ({ id, item, onChange, idx, removeitem, additem, options, itemCou
         </Grid>
     );
 
+const Network = ({ id, item, onChange, idx, removeitem, additem, options, itemCount }) =>
+    (
+        <Grid hasGutter id={id}>
+            <FormGroup className="pf-m-3-col-on-md" label={_("Network name")} fieldId={id + "-network-name"}>
+                <TextInput id={id + "-network-name"}
+                    value={item.networkName || ''}
+                    onChange={ value => onChange(idx, 'networkName', value) } />
+            </FormGroup>
+            <FormGroup className="pf-m-3-col-on-md" label={_("Gateway")} fieldId={id + "-gateway"}>
+                <TextInput id={id + "-gateway"}
+                    value={item.gateway || ''}
+                    onChange={value => onChange(idx, 'gateway', value)} />
+            </FormGroup>
+            <FormGroup className="pf-m-3-col-on-md" label={_("Subnet")} fieldId={id + "-subnet"}>
+                <TextInput id={id + "-subnet"}
+                    value={item.subnet || ''}
+                    onChange={value => onChange(idx, 'subnet', value)} />
+            </FormGroup>
+            <FormGroup className="pf-m-3-col-on-md" label={_("IP range")} fieldId={id + "-ip-range"}>
+                <TextInput id={id + "-ip-range"}
+                    value={item.ipRange || ''}
+                    onChange={value => onChange(idx, 'ipRange', value)} />
+            </FormGroup>
+            <FormGroup className="pf-m-3-col-on-md" label={_("Driver")} fieldId={id + "-driver"}>
+                <TextInput id={id + "-driver"}
+                    value={item.driver || ''}
+                    onChange={value => onChange(idx, 'driver', value)} />
+            </FormGroup>
+            <FormGroup className="pf-m-2-col-on-md" label={_("DNS")} fieldId={id + "-disable-dns"}>
+                <Checkbox id={id + "-disable-dns"}
+                    label={_("Disabled")}
+                    isChecked={item.disableDNS == true}
+                    onChange={value => onChange(idx, 'disableDNS', value)} />
+            </FormGroup>
+            <FormGroup className="pf-m-2-col-on-md" label={_("Internal")} fieldId={id + "-internal"}>
+                <Checkbox id={id + "-internal"}
+                    label={_("Yes")}
+                    isChecked={item.internal == true}
+                    onChange={value => onChange(idx, 'internal', value)} />
+            </FormGroup>
+            <FormGroup className="pf-m-1-col-on-md remove-button-group">
+                <Button variant='secondary'
+                    className="btn-close"
+                    id={id + "-btn-close"}
+                    aria-label={_("Remove item")}
+                    isSmall
+                    icon={<MinusIcon />}
+                    onClick={() => removeitem(idx)} />
+            </FormGroup>
+        </Grid>
+    );
+
 class DynamicListForm extends React.Component {
     constructor(props) {
         super(props);
@@ -317,6 +369,7 @@ export class ImageRunModal extends React.Component {
             memoryUnit: 'MiB',
             validationFailed: {},
             volumes: [],
+            networks: [],
             runImage: true,
             restartPolicy: "no",
             restartTries: 5,
@@ -408,6 +461,15 @@ export class ImageRunModal extends React.Component {
                             record.options.push(volume.mode);
                         if (volume.selinux)
                             record.options.push(volume.selinux);
+                        return record;
+                    });
+        }
+        if (this.state.networks.length > 0) {
+            createConfig.networks = this.state.networks
+                    .filter(network => network.networkName)
+                    .map(network => {
+                        const record = { name: network.networkName, driver: network.driver };
+                        record.options = [];
                         return record;
                     });
         }
@@ -1023,6 +1085,16 @@ export class ImageRunModal extends React.Component {
                                  default={{ containerPath: null, hostPath: null, mode: 'rw' }}
                                  options={{ selinuxAvailable: this.props.selinuxAvailable }}
                                  itemcomponent={ <Volume />} />
+
+                        <DynamicListForm id='run-image-dialog-network'
+                                 emptyStateString={_("No networks specified")}
+                                 formclass='network-form'
+                                 label={_("Networks")}
+                                 actionLabel={_("Add network")}
+                                 onChange={value => this.onValueChanged('networks', value)}
+                                 default={{ networkName: null, driver: "bridge", options: null, gateway: null, subnet: null, ipRange: null, ipv6: true, internal: false, disableDNS: false }}
+                                 options={{ selinuxAvailable: this.props.selinuxAvailable }}
+                                 itemcomponent={ <Network />} />
 
                         <DynamicListForm id='run-image-dialog-env'
                                  emptyStateString={_("No environment variables specified")}
