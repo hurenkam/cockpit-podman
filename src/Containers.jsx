@@ -326,6 +326,9 @@ class Containers extends React.Component {
         this.state = {
             width: 0,
             showCreateContainerModal: false,
+            showPruneContainersModal: false,
+            showCreatePodsModal: false,
+            showPrunePodsModal: false,
             createPod: null,
             downloadingContainers: [],
         };
@@ -523,6 +526,49 @@ class Containers extends React.Component {
             });
         }
 
+        const ContainerOverActions = (
+            { unusedContainers, unusedPods }
+        ) => {
+            const [isActionsKebabOpen, setIsActionsKebabOpen] = useState(false);
+
+            return (
+                <Dropdown toggle={<KebabToggle onToggle={() => setIsActionsKebabOpen(!isActionsKebabOpen)} id="image-actions-dropdown" />}
+                          isOpen={isActionsKebabOpen}
+                          isPlain
+                          position="right"
+                          dropdownItems={[
+                              <DropdownItem key="create-new-container"
+                                            component="button"
+                                            onClick={() => this.setState({ showCreateContainerModal: true })}>
+                                  {_("Create new container")}
+                              </DropdownItem>,
+                              <DropdownItem key="prune-unused-containers"
+                                            id="prune-unused-containers-button"
+                                            component="button"
+                                            className="pf-m-danger btn-delete"
+                                            onClick={() => this.setState({ showPruneContainersModal: true })}
+                                            isDisabled={unusedContainers.length === 0}
+                                            isAriaDisabled={unusedContainers.length === 0}>
+                                  {_("Prune unused containers")}
+                              </DropdownItem>,
+                              <DropdownItem key="create-new-pod"
+                                            component="button"
+                                            onClick={() => this.setState({ showCreatePodModal: true })}>
+                                  {_("Create new pod")}
+                              </DropdownItem>,
+                              <DropdownItem key="prune-unused-pods"
+                                            id="prune-unused-pods-button"
+                                            component="button"
+                                            className="pf-m-danger btn-delete"
+                                            onClick={() => this.setState({ showPrunePodsModal: true })}
+                                            isDisabled={unusedPods.length === 0}
+                                            isAriaDisabled={unusedPods.length === 0}>
+                                  {_("Prune unused pods")}
+                              </DropdownItem>,
+                          ]} />
+            );
+        };
+
         const filterRunning =
             <Toolbar>
                 <ToolbarContent>
@@ -537,12 +583,12 @@ class Containers extends React.Component {
                     </ToolbarItem>
                     <Divider isVertical />
                     <ToolbarItem>
-                        <Button variant="primary" key="get-new-image-action"
-                        id="containers-containers-create-container-btn"
-                        isDisabled={localImages === null}
-                        onClick={() => this.setState({ showCreateContainerModal: true })}>
-                            {_("Create container")}
-                        </Button>
+                        <ContainerOverActions handleCreateContainer={this.showCreateContainerModal}
+                                              handlePruneContainers={this.showPruneContainersModal}
+                                              handleCreatePod={this.showCreatePodModal}
+                                              handlePrunePods={this.showPrunePodsModal}
+                                              unusedContainers={[]}
+                                              unusedPods={[]} />
                     </ToolbarItem>
                 </ToolbarContent>
                 {this.state.showCreateContainerModal && localImages &&
