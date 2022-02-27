@@ -32,6 +32,9 @@ import { superuser } from "superuser";
 import ContainerHeader from './ContainerHeader.jsx';
 import Containers from './Containers.jsx';
 import Images from './Images.jsx';
+import Pods from './Pods.jsx';
+import Networks from './Networks.jsx';
+import Volumes from './Volumes.jsx';
 import * as client from './client.js';
 
 const _ = cockpit.gettext;
@@ -651,6 +654,51 @@ class Application extends React.Component {
                 selinuxAvailable={this.state.selinuxAvailable}
                 podmanRestartAvailable={this.state.podmanRestartAvailable}
             />;
+        const podList =
+            <Pods
+                key="podList"
+                pods={this.state.systemPodsLoaded && this.state.userPodsLoaded ? this.state.pods : null}
+                onAddNotification={this.onAddNotification}
+                textFilter={this.state.textFilter}
+                ownerFilter={this.state.ownerFilter}
+                showAll={ () => this.setState({ containersFilter: "all" }) }
+                user={this.state.currentUser}
+                userServiceAvailable={this.state.userServiceAvailable}
+                systemServiceAvailable={this.state.systemServiceAvailable}
+                registries={this.state.registries}
+                selinuxAvailable={this.state.selinuxAvailable}
+                podmanRestartAvailable={this.state.podmanRestartAvailable}
+            />;
+        const networkList =
+            <Networks
+                key="networkList"
+                networks={[]}
+                onAddNotification={this.onAddNotification}
+                textFilter={this.state.textFilter}
+                ownerFilter={this.state.ownerFilter}
+                showAll={ () => this.setState({ containersFilter: "all" }) }
+                user={this.state.currentUser}
+                userServiceAvailable={this.state.userServiceAvailable}
+                systemServiceAvailable={this.state.systemServiceAvailable}
+                registries={this.state.registries}
+                selinuxAvailable={this.state.selinuxAvailable}
+                podmanRestartAvailable={this.state.podmanRestartAvailable}
+            />;
+        const volumeList =
+            <Volumes
+                key="volumeList"
+                volumes={[]}
+                onAddNotification={this.onAddNotification}
+                textFilter={this.state.textFilter}
+                ownerFilter={this.state.ownerFilter}
+                showAll={ () => this.setState({ containersFilter: "all" }) }
+                user={this.state.currentUser}
+                userServiceAvailable={this.state.userServiceAvailable}
+                systemServiceAvailable={this.state.systemServiceAvailable}
+                registries={this.state.registries}
+                selinuxAvailable={this.state.selinuxAvailable}
+                podmanRestartAvailable={this.state.podmanRestartAvailable}
+            />;
         const containerList =
             <Containers
                 key="containerList"
@@ -705,6 +753,9 @@ class Application extends React.Component {
                         { this.state.showStartService ? startService : null }
                         {imageList}
                         {containerList}
+                        {podList}
+                        {volumeList}
+                        {networkList}
                     </Stack>
                 </PageSection>
             </Page>
