@@ -1,4 +1,4 @@
-#containers-pods div.download-in-progress {
+#containers-networks div.download-in-progress {
     color: grey;
     font-weight: bold;
 }
@@ -8,11 +8,11 @@
     color: var(--pf-global--danger-color--200);
 }
 
-#containers-pods .pf-c-table.pf-m-compact .pf-c-table__action {
+#containers-networks .pf-c-table.pf-m-compact .pf-c-table__action {
     --pf-c-table__action--PaddingTop: 0.5rem;
     --pf-c-table__action--PaddingBottom: 0.5rem;
 }
 
-.containers-pods .pf-c-expandable-section__content {
+.containers-networks .pf-c-expandable-section__content {
     margin-top: 0px;
 }
