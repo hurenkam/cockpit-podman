@@ -28,6 +28,7 @@ import ContainerCommitModal from './ContainerCommitModal.jsx';
 
 import './Containers.scss';
 import { ImageRunModal } from './ImageRunModal.jsx';
+import { CreatePodModal } from './CreatePodModal.jsx';
 import { PodActions } from './PodActions.jsx';
 
 const _ = cockpit.gettext;
@@ -327,7 +328,7 @@ class Containers extends React.Component {
             width: 0,
             showCreateContainerModal: false,
             showPruneContainersModal: false,
-            showCreatePodsModal: false,
+            showCreatePodModal: false,
             showPrunePodsModal: false,
             createPod: null,
             downloadingContainers: [],
@@ -583,11 +584,7 @@ class Containers extends React.Component {
                     </ToolbarItem>
                     <Divider isVertical />
                     <ToolbarItem>
-                        <ContainerOverActions handleCreateContainer={this.showCreateContainerModal}
-                                              handlePruneContainers={this.showPruneContainersModal}
-                                              handleCreatePod={this.showCreatePodModal}
-                                              handlePrunePods={this.showPrunePodsModal}
-                                              unusedContainers={[]}
+                        <ContainerOverActions unusedContainers={[]}
                                               unusedPods={[]} />
                     </ToolbarItem>
                 </ToolbarContent>
@@ -602,6 +599,12 @@ class Containers extends React.Component {
                 podmanRestartAvailable={this.props.podmanRestartAvailable}
                 systemServiceAvailable={this.props.systemServiceAvailable}
                 userServiceAvailable={this.props.userServiceAvailable}
+                onAddNotification={this.props.onAddNotification}
+                /> }
+                {this.state.showCreatePodModal &&
+                <CreatePodModal
+                user={this.props.user}
+                close={() => this.setState({ showCreatePodModal: false })}
                 onAddNotification={this.props.onAddNotification}
                 /> }
             </Toolbar>;
