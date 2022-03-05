@@ -1,12 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
     Button, Checkbox,
-    EmptyState, EmptyStateBody,
-    Form, FormGroup, FormFieldGroup, FormFieldGroupHeader,
+    Form, FormGroup,
     FormSelect, FormSelectOption,
     Grid, GridItem,
-    HelperText, HelperTextItem,
     Modal, Select, SelectVariant,
     SelectOption, SelectGroup, Stack,
     TextInput, Tabs, Tab, TabTitleText,
@@ -18,6 +15,8 @@ import { MinusIcon, OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import * as dockerNames from 'docker-names';
 
 import { ErrorNotification } from './Notification.jsx';
+import { PublishPort } from './PublishPort.jsx';
+import { DynamicListForm } from './DynamicListForm.jsx';
 import { FileAutoComplete } from 'cockpit-components-file-autocomplete.jsx';
 import * as utils from './util.js';
 import * as client from './client.js';
@@ -47,79 +46,6 @@ const units = {
         base1024Exponent: 3,
     },
 };
-
-const PublishPort = ({ id, item, onChange, idx, removeitem, itemCount }) =>
-    (
-        <Grid hasGutter id={id}>
-            <FormGroup className="pf-m-4-col-on-md"
-                label={_("IP address")}
-                fieldId={id + "-ip-address"}
-                labelIcon={
-                    <Popover aria-label={_("IP address help")}
-                        enableFlip
-                        bodyContent={_("If host IP is set to 0.0.0.0 or not set at all, the port will be bound on all IPs on the host.")}>
-                        <button onClick={e => e.preventDefault()} className="pf-c-form__group-label-help">
-                            <OutlinedQuestionCircleIcon />
-                        </button>
-                    </Popover>
-                }>
-                <TextInput id={id + "-ip-address"}
-                        value={item.IP || ''}
-                        onChange={value => onChange(idx, 'IP', value)} />
-            </FormGroup>
-            <FormGroup className="pf-m-2-col-on-md"
-                    label={_("Host port")}
-                    fieldId={id + "-host-port"}
-                    labelIcon={
-                        <Popover aria-label={_("Host port help")}
-                            enableFlip
-                            bodyContent={_("If the host port is not set the container port will be randomly assigned a port on the host.")}>
-                            <button onClick={e => e.preventDefault()} className="pf-c-form__group-label-help">
-                                <OutlinedQuestionCircleIcon />
-                            </button>
-                        </Popover>
-                    }>
-                <TextInput id={id + "-host-port"}
-                            type='number'
-                            step={1}
-                            min={1}
-                            max={65535}
-                            value={item.hostPort || ''}
-                            onChange={value => onChange(idx, 'hostPort', value)} />
-            </FormGroup>
-            <FormGroup className="pf-m-3-col-on-md"
-                        label={_("Container port")}
-                        fieldId={id + "-container-port"} isRequired>
-                <TextInput id={id + "-container-port"}
-                            type='number'
-                            step={1}
-                            min={1}
-                            max={65535}
-                            value={item.containerPort || ''}
-                            onChange={value => onChange(idx, 'containerPort', value)} />
-            </FormGroup>
-            <FormGroup className="pf-m-2-col-on-md"
-                        label={_("Protocol")}
-                        fieldId={id + "-protocol"}>
-                <FormSelect className='pf-c-form-control container-port-protocol'
-                            id={id + "-protocol"}
-                            value={item.protocol}
-                            onChange={value => onChange(idx, 'protocol', value)}>
-                    <FormSelectOption value='tcp' key='tcp' label={_("TCP")} />
-                    <FormSelectOption value='udp' key='udp' label={_("UDP")} />
-                </FormSelect>
-            </FormGroup>
-            <FormGroup className="pf-m-1-col-on-md remove-button-group">
-                <Button variant='secondary'
-                            className="btn-close"
-                            id={id + "-btn-close"}
-                            isSmall
-                            aria-label={_("Remove item")}
-                            icon={<MinusIcon />}
-                            onClick={() => removeitem(idx)} />
-            </FormGroup>
-        </Grid>
-    );
 
 const handleEnvValue = (key, value, idx, onChange, additem, itemCount) => {
     // Allow the input of KEY=VALUE separated value pairs for bulk import
@@ -209,87 +135,6 @@ const Volume = ({ id, item, onChange, idx, removeitem, additem, options, itemCou
             </FormGroup>
         </Grid>
     );
-
-class DynamicListForm extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            list: [],
-        };
-        this.keyCounter = 0;
-        this.removeItem = this.removeItem.bind(this);
-        this.addItem = this.addItem.bind(this);
-        this.onItemChange = this.onItemChange.bind(this);
-    }
-
-    removeItem(idx, field, value) {
-        this.setState(state => {
-            const items = state.list.concat();
-            items.splice(idx, 1);
-            return { list: items };
-        }, () => this.props.onChange(this.state.list.concat()));
-    }
-
-    addItem() {
-        this.setState(state => {
-            return { list: [...state.list, Object.assign({ key: this.keyCounter++ }, this.props.default)] };
-        }, () => this.props.onChange(this.state.list.concat()));
-    }
-
-    onItemChange(idx, field, value) {
-        this.setState(state => {
-            const items = state.list.concat();
-            items[idx][field] = value || null;
-            return { list: items };
-        }, () => this.props.onChange(this.state.list.concat()));
-    }
-
-    render () {
-        const { id, label, actionLabel, formclass, emptyStateString, helperText } = this.props;
-        const dialogValues = this.state;
-        return (
-            <FormFieldGroup header={
-                <FormFieldGroupHeader
-                    titleText={{ text: label }}
-                    actions={<Button variant="secondary" className="btn-add" onClick={this.addItem}>{actionLabel}</Button>}
-                />
-            } className={"dynamic-form-group " + formclass}>
-                {
-                    dialogValues.list.length
-                        ? <>
-                            {dialogValues.list.map((item, idx) => {
-                                return React.cloneElement(this.props.itemcomponent, {
-                                    idx: idx, item: item, id: id + "-" + idx,
-                                    key: idx,
-                                    onChange: this.onItemChange, removeitem: this.removeItem, additem: this.addItem, options: this.props.options,
-                                    itemCount: Object.keys(dialogValues.list).length,
-                                });
-                            })
-                            }
-                            {helperText &&
-                            <HelperText>
-                                <HelperTextItem>{helperText}</HelperTextItem>
-                            </HelperText>
-                            }
-                        </>
-                        : <EmptyState>
-                            <EmptyStateBody>
-                                {emptyStateString}
-                            </EmptyStateBody>
-                        </EmptyState>
-                }
-            </FormFieldGroup>
-        );
-    }
-}
-DynamicListForm.propTypes = {
-    emptyStateString: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired,
-    id: PropTypes.string.isRequired,
-    itemcomponent: PropTypes.object.isRequired,
-    formclass: PropTypes.string,
-    options: PropTypes.object,
-};
 
 export class ImageRunModal extends React.Component {
     constructor(props) {

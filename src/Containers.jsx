@@ -605,6 +605,8 @@ class Containers extends React.Component {
                 <CreatePodModal
                 user={this.props.user}
                 close={() => this.setState({ showCreatePodModal: false })}
+                systemServiceAvailable={this.props.systemServiceAvailable}
+                userServiceAvailable={this.props.userServiceAvailable}
                 onAddNotification={this.props.onAddNotification}
                 /> }
             </Toolbar>;
