@@ -20,7 +20,7 @@ function podmanCall(name, method, args, system, body) {
         body: body || "",
         params: args,
     };
-
+    console.log("client.js@podmanCall() " + JSON.stringify(options));
     return rest.call(getAddress(system), system, options);
 }
 
@@ -122,6 +122,25 @@ export function postContainer(system, action, id, args) {
     });
 }
 
+export function getPods(system, id) {
+    return new Promise((resolve, reject) => {
+        const options = {};
+        if (id)
+            options.filters = JSON.stringify({ id: [id] });
+        podmanCall("libpod/pods/json", "GET", options, system)
+                .then(reply => resolve(JSON.parse(reply)))
+                .catch(reject);
+    });
+}
+
+export function createPod(system, config) {
+    return new Promise((resolve, reject) => {
+        podmanCall("libpod/pods/create", "POST", {}, system, JSON.stringify(config))
+                .then(reply => resolve(JSON.parse(reply)))
+                .catch(reject);
+    });
+}
+
 export function postPod(system, action, id, args) {
     return new Promise((resolve, reject) => {
         podmanCall("libpod/pods/" + id + "/" + action, "POST", args, system)
@@ -137,6 +156,18 @@ export function delPod(system, id, force) {
         };
         podmanCall("libpod/pods/" + id, "DELETE", options, system)
                 .then(resolve)
+                .catch(reject);
+    });
+}
+
+export function getNetworks(system, id) {
+    return new Promise((resolve, reject) => {
+        const options = { all: true };
+        if (id)
+            options.filters = JSON.stringify({ id: [id] });
+
+        podmanCall("libpod/containers/json", "GET", options, system)
+                .then(reply => resolve(JSON.parse(reply)))
                 .catch(reject);
     });
 }
@@ -214,17 +245,6 @@ export function getImages(system, id) {
                             })
                             .catch(reject);
                 })
-                .catch(reject);
-    });
-}
-
-export function getPods(system, id) {
-    return new Promise((resolve, reject) => {
-        const options = {};
-        if (id)
-            options.filters = JSON.stringify({ id: [id] });
-        podmanCall("libpod/pods/json", "GET", options, system)
-                .then(reply => resolve(JSON.parse(reply)))
                 .catch(reject);
     });
 }
